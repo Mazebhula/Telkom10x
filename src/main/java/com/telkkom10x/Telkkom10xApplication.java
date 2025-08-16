@@ -1,6 +1,7 @@
 package com.telkkom10x;
 
 import com.telkkom10x.database.DatabaseIntializer;
+import com.telkkom10x.database.DirectionRepository;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
@@ -8,6 +9,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class Telkkom10xApplication {
     public static void main(String[] args) {
         DatabaseIntializer.initialize();
+
         SpringApplication.run(Telkkom10xApplication.class, args);
     }
 }
