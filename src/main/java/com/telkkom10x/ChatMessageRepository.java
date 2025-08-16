@@ -18,8 +18,8 @@ public class ChatMessageRepository {
     }
 
     public void save(ChatMessage message) {
-        String sql = "INSERT INTO chat_messages (sender, content, chat_group, timestamp) VALUES (?, ?, ?, ?)";
-        jdbcTemplate.update(sql, message.getSender(), message.getContent(), message.getGroup(), message.getTimestamp());
+        String sql = "INSERT INTO chat_messages (sender, content, chat_group, source, timestamp) VALUES (?, ?, ?, ?, ?)";
+        jdbcTemplate.update(sql, message.getSender(), message.getContent(), message.getGroup(), message.getSource(), message.getTimestamp());
     }
 
     public List<ChatMessage> findByGroup(String group) {
@@ -33,7 +33,8 @@ public class ChatMessageRepository {
                 rs.getString("sender"),
                 rs.getString("content"),
                 rs.getString("chat_group"),
-                rs.getTimestamp("timestamp").toLocalDateTime()
+                rs.getString("source"),
+                rs.getTimestamp("timestamp") != null ? rs.getTimestamp("timestamp").toLocalDateTime() : null
         );
     }
 }
