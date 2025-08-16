@@ -38,7 +38,7 @@ public class FormService {
 
         Map<String, PdfFormField> fields = form.getAllFormFields();
         fields.forEach((name, field) -> {
-            if (name.toLowerCase().contains("first") && userData.getFirstName() != null) {
+            if (name.toLowerCase().contains("first") || name.toLowerCase().contains("Name")) {
                 field.setValue(userData.getFirstName());
             } else if (name.toLowerCase().contains("last") && userData.getLastName() != null) {
                 field.setValue(userData.getLastName());

@@ -1,6 +1,0 @@
-com/telkom/model/UserData.class
-com/telkom/service/FormService.class
-com/telkom/repository/UserDataRepository.class
-com/telkom/coonfig/SecurityConfig.class
-com/telkom/FormAutofillApplication.class
-com/telkom/controller/FormController.class
