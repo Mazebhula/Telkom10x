@@ -22,7 +22,14 @@ public class FormController {
     @GetMapping("/")
     public String showForm(Model model) {
         model.addAttribute("userData", new UserData());
-        return "form";
+        return "login";
+    }
+    @GetMapping("/login")
+    public String showLogin(Model model, @RequestParam(value = "error", required = false) String error) {
+        if (error != null) {
+            model.addAttribute("error", "Invalid username or password");
+        }
+        return "login"; // Maps to login.html
     }
 
     @PostMapping("/save")
