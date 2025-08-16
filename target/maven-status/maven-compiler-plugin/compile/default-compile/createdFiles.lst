@@ -1,0 +1,10 @@
+com/telkkom10x/Location.class
+com/telkkom10x/ChatController.class
+com/telkkom10x/LocationUtils.class
+com/telkkom10x/database/DatabaseIntializer.class
+com/telkkom10x/Telkkom10xApplication.class
+com/telkkom10x/database/DirectionRepository.class
+com/telkkom10x/controller/MainController.class
+com/telkkom10x/WebSocketConfig.class
+com/telkkom10x/ChatMessage.class
+com/telkkom10x/ChatMessageRepository.class
