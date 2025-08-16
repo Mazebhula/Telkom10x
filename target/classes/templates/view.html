@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>View User Data</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+<div class="container">
+    <h1>User Data</h1>
+    <div th:if="${userData.id}">
+        <p><strong>Email:</strong> <span th:text="${userData.email}"></span></p>
+        <p><strong>First Name:</strong> <span th:text="${userData.firstName}"></span></p>
+        <p><strong>Last Name:</strong> <span th:text="${userData.lastName}"></span></p>
+        <p><strong>Address:</strong> <span th:text="${userData.address}"></span></p>
+        <p><strong>Phone:</strong> <span th:text="${userData.phone}"></span></p>
+    </div>
+    <div th:unless="${userData.id}">
+        <p>No data found for this email.</p>
+    </div>
+    <a href="/">Back to Form</a>
+</div>
+</body>
+</html>
