@@ -14,3 +14,52 @@ a:hover { text-decoration: underline; }
 nav ul { list-style: none; padding: 0; }
 nav ul li { display: inline-block; margin: 0 15px; }
 nav ul li a { font-size: 18px; }
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    margin: 40px;
+}
+.dashboard-container, .find-taxi-container {
+    max-width: 600px;
+    margin: auto;
+    padding: 20px;
+    background-color: white;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+h2 {
+    text-align: center;
+    color: #333;
+}
+.message.error {
+    color: red;
+    text-align: center;
+    margin-bottom: 15px;
+}
+nav ul {
+    list-style: none;
+    padding: 0;
+}
+nav ul li {
+    margin: 10px 0;
+}
+nav ul li a {
+    text-decoration: none;
+    color: #007bff;
+    font-size: 18px;
+}
+nav ul li a:hover {
+    color: #0056b3;
+}
+button {
+    width: 100%;
+    padding: 10px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+}
+button:hover {
+    background-color: #0056b3;
+}

@@ -3,26 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard</title>
+    <title>Find a Taxi</title>
     <link rel="stylesheet" th:href="@{/css/login.css}" />
 </head>
 <body>
-<div class="dashboard-container">
-    <h2>Welcome, <span th:text="${username}"></span>!</h2>
+<div class="find-taxi-container">
+    <h2 th:text="${message}">Find a Taxi</h2>
+    <p>User: <span th:text="${username}"></span></p>
     <div th:if="${location}">
         <p>Location: <span th:text="${location.latitude + ', ' + location.longitude}"></span>
             <span th:if="${location.city}" th:text="${' (' + location.city + ', ' + location.country + ')'}"></span></p>
+        <!-- Add taxi search form or map here -->
     </div>
-    <div th:if="${error}" class="message error" th:text="${error}"></div>
-    <button onclick="getLocation()">Share My Location</button>
-    <nav>
-        <ul>
-            <li><a th:href="@{/home}">Home</a></li>
-            <li><a th:href="@{/find_taxi}">Find a Taxi</a></li>
-            <li><a th:href="@{/chat}">Chat</a></li>
-            <li><a th:href="@{/logout}">Logout</a></li>
-        </ul>
-    </nav>
+    <div th:if="${!location}">
+        <button onclick="getLocation()">Share My Location</button>
+    </div>
+    <p><a th:href="@{/dashboard}">Back to Dashboard</a></p>
+    <p><a th:href="@{/logout}">Logout</a></p>
 </div>
 <script>
     function getLocation() {
