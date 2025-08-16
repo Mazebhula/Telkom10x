@@ -1,22 +1,29 @@
 package com.telkkom10x.controller;
 
-import com.fasterxml.jackson.databind.JsonNode;
+import com.telkkom10x.ChatMessageRepository;
 import com.telkkom10x.Location;
 import com.telkkom10x.LocationUtils;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import jakarta.servlet.http.HttpSession;
+
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.JsonNode;
 
 @Controller
 public class MainController {
 
-    // Existing methods (home, login, dashboard, find_taxi, logout) unchanged
+    private final ChatMessageRepository chatMessageRepository;
+
+    public MainController(ChatMessageRepository chatMessageRepository) {
+        this.chatMessageRepository = chatMessageRepository;
+    }
+
     @GetMapping({"/", "/home"})
     public String home(Model model) {
         model.addAttribute("welcomeMessage", "Welcome to Telkkom10x!");
@@ -90,6 +97,7 @@ public class MainController {
         model.addAttribute("username", username);
         model.addAttribute("chatGroup", chatGroup);
         model.addAttribute("message", "Chat with users in " + (location.getCity() != null ? location.getCity() : "your area"));
+        model.addAttribute("chatHistory", chatMessageRepository.findByGroup(chatGroup));
         return "chat";
     }
 
