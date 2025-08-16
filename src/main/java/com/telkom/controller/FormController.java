@@ -24,16 +24,29 @@ public class FormController {
     public String showForm(Model model, Authentication authentication) {
         if (authentication != null && authentication.isAuthenticated()) {
             model.addAttribute("userData", new UserData());
-            return "form"; // Maps to form.html
+            return "dashboard"; // Maps to form.html for "Find a Taxi"
         }
         return "redirect:/login";
     }
+
     @GetMapping("/login")
     public String showLogin(Model model, @RequestParam(value = "error", required = false) String error) {
         if (error != null) {
             model.addAttribute("error", "Invalid username or password");
         }
         return "login"; // Maps to login.html
+    }
+
+    @GetMapping("/dashboard")
+    public String showDashboard(Model model, Authentication authentication) {
+        if (authentication != null && authentication.isAuthenticated()) {
+            String email = authentication.getName(); // Assumes email is the username in authentication
+            UserData userData = formService.getUserData(email);
+            model.addAttribute("username", email);
+            model.addAttribute("userData", userData != null ? userData : new UserData());
+            return "dashboard"; // Maps to view.html for "whoami"
+        }
+        return "redirect:/dashboard";
     }
 
     @PostMapping("/save")

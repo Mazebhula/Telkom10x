@@ -35,9 +35,10 @@ public class FormService {
         PdfWriter writer = new PdfWriter(outputStream);
         PdfDocument pdfDoc = new PdfDocument(reader, writer);
         PdfAcroForm form = PdfAcroForm.getAcroForm(pdfDoc, true);
-
+        System.out.println("test");
         Map<String, PdfFormField> fields = form.getAllFormFields();
         fields.forEach((name, field) -> {
+            System.out.println(field);
             if (name.toLowerCase().contains("first") || name.toLowerCase().contains("Name")) {
                 field.setValue(userData.getFirstName());
             } else if (name.toLowerCase().contains("last") && userData.getLastName() != null) {
