@@ -1,6 +1,8 @@
 package com.telkkom10x.controller;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.telkkom10x.Location;
+import com.telkkom10x.LocationUtils;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -9,11 +11,12 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Controller
 public class MainController {
 
-    // Existing methods (home, login, dashboard, find_taxi, chat, logout) unchanged
+    // Existing methods (home, login, dashboard, find_taxi, logout) unchanged
     @GetMapping({"/", "/home"})
     public String home(Model model) {
         model.addAttribute("welcomeMessage", "Welcome to Telkkom10x!");
@@ -78,12 +81,15 @@ public class MainController {
         if (username == null) {
             return "redirect:/login";
         }
-        model.addAttribute("username", username);
-        model.addAttribute("message", "Start chatting!");
         Location location = (Location) session.getAttribute("location");
-        if (location != null) {
-            model.addAttribute("location", location);
+        if (location == null) {
+            model.addAttribute("error", "Please share your location to join a chat group.");
+            return "redirect:/dashboard";
         }
+        String chatGroup = LocationUtils.getChatGroup(location);
+        model.addAttribute("username", username);
+        model.addAttribute("chatGroup", chatGroup);
+        model.addAttribute("message", "Chat with users in " + (location.getCity() != null ? location.getCity() : "your area"));
         return "chat";
     }
 
@@ -93,7 +99,6 @@ public class MainController {
         return "redirect:/login";
     }
 
-    // New endpoint to receive location from client
     @PostMapping("/location")
     public String saveLocation(@RequestParam(required = false) Double latitude,
                                @RequestParam(required = false) Double longitude,
@@ -103,13 +108,10 @@ public class MainController {
         if (username == null) {
             return "redirect:/login";
         }
-
-        // If client provides coordinates, use them
         if (latitude != null && longitude != null) {
             Location location = new Location(latitude, longitude);
             session.setAttribute("location", location);
         } else {
-            // Fallback to IP-based geolocation
             try {
                 Location location = getLocationFromIp();
                 session.setAttribute("location", location);
@@ -117,10 +119,9 @@ public class MainController {
                 model.addAttribute("error", "Unable to retrieve location: " + e.getMessage());
             }
         }
-        return "redirect:/dashboard"; // Or redirect to /find_taxi if preferred
+        return "redirect:/dashboard";
     }
 
-    // Helper method for IP-based geolocation fallback
     private Location getLocationFromIp() throws Exception {
         HttpClient client = HttpClient.newHttpClient();
         HttpRequest request = HttpRequest.newBuilder()
@@ -128,12 +129,13 @@ public class MainController {
                 .GET()
                 .build();
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-        // Simple JSON parsing (in production, use Jackson or Gson)
-        String json = response.body();
-        double latitude = Double.parseDouble(json.split("\"lat\":")[1].split(",")[0]);
-        double longitude = Double.parseDouble(json.split("\"lon\":")[1].split(",")[0]);
-        String city = json.split("\"city\":\"")[1].split("\"")[0];
-        String country = json.split("\"country\":\"")[1].split("\"")[0];
-        return new Location(latitude, longitude, city, country);
+        ObjectMapper mapper = new ObjectMapper();
+        JsonNode json = mapper.readTree(response.body());
+        return new Location(
+                json.get("lat").asDouble(),
+                json.get("lon").asDouble(),
+                json.get("city").asText(),
+                json.get("country").asText()
+        );
     }
 }
