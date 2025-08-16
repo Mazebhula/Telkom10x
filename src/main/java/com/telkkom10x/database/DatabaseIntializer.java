@@ -6,7 +6,8 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.ResultSet;
 
-public class DatabaseIntializer {
+public class
+DatabaseIntializer {
     private static final String DB_URL = "jdbc:sqlite:8ta-xi.sqlite";
 
     public static void initialize() {
