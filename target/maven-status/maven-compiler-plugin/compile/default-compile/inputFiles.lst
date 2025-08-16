@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /Users/denzhedzebu/Desktop/Telkkom10x/src/main/java/com/telkkom10x/database/DirectionRepository.java
 /Users/denzhedzebu/Desktop/Telkkom10x/src/main/java/com/telkkom10x/WebSocketConfig.java
 /Users/denzhedzebu/Desktop/Telkkom10x/src/main/java/com/telkkom10x/LocationUtils.java
@@ -8,3 +9,17 @@
 /Users/denzhedzebu/Desktop/Telkkom10x/src/main/java/com/telkkom10x/ChatMessage.java
 /Users/denzhedzebu/Desktop/Telkkom10x/src/main/java/com/telkkom10x/Telkkom10xApplication.java
 /Users/denzhedzebu/Desktop/Telkkom10x/src/main/java/com/telkkom10x/controller/ChatController.java
+=======
+/home/vhuhwavho/Telkom-h/Telkom10x/src/main/java/com/telkkom10x/controller/MainController.java
+/home/vhuhwavho/Telkom-h/Telkom10x/src/main/java/com/telkkom10x/Telkkom10xApplication.java
+/home/vhuhwavho/Telkom-h/Telkom10x/src/main/java/com/telkkom10x/Location.java
+/home/vhuhwavho/Telkom-h/Telkom10x/src/main/java/com/telkkom10x/database/RouteDAI.java
+/home/vhuhwavho/Telkom-h/Telkom10x/src/main/java/com/telkkom10x/database/DirectionDAI.java
+/home/vhuhwavho/Telkom-h/Telkom10x/src/main/java/com/telkkom10x/database/InsertData.java
+/home/vhuhwavho/Telkom-h/Telkom10x/src/main/java/com/telkkom10x/database/DirectionRepository.java
+/home/vhuhwavho/Telkom-h/Telkom10x/src/main/java/com/telkkom10x/database/PossibleTaxiDO.java
+/home/vhuhwavho/Telkom-h/Telkom10x/src/main/java/com/telkkom10x/database/RouteDO.java
+/home/vhuhwavho/Telkom-h/Telkom10x/src/main/java/com/telkkom10x/database/PossibleTaxiDAI.java
+/home/vhuhwavho/Telkom-h/Telkom10x/src/main/java/com/telkkom10x/database/DirectionsDO.java
+/home/vhuhwavho/Telkom-h/Telkom10x/src/main/java/com/telkkom10x/database/DatabaseIntializer.java
+>>>>>>> 06128aa (added  some dummy info on our database)
