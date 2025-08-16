@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,9 +21,12 @@ public class FormController {
     private FormService formService;
 
     @GetMapping("/")
-    public String showForm(Model model) {
-        model.addAttribute("userData", new UserData());
-        return "login";
+    public String showForm(Model model, Authentication authentication) {
+        if (authentication != null && authentication.isAuthenticated()) {
+            model.addAttribute("userData", new UserData());
+            return "form"; // Maps to form.html
+        }
+        return "redirect:/login";
     }
     @GetMapping("/login")
     public String showLogin(Model model, @RequestParam(value = "error", required = false) String error) {
