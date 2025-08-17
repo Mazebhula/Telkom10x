@@ -4,7 +4,7 @@ FROM maven:3.9.9-eclipse-temurin-21
 WORKDIR /app
 
 # Copy the Maven-built JAR file from the target directory
-COPY target/Telkkom10x-0.0.1-SNAPSHOT.jar app.jar
+COPY target/form-autofill-app-0.0.1-SNAPSHOT.jar app.jar
 
 # Expose port 8080 for the Spring Boot app
 EXPOSE 8080
