@@ -1,123 +1,3 @@
-/*!* Global Styles *!*/
-/*body {*/
-/*    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;*/
-/*    background-color: #1e3a8a; !* Deep blue background *!*/
-/*    margin: 0;*/
-/*    padding: 0;*/
-/*    color: #ffffff; !* White text for contrast *!*/
-/*}*/
-
-/*!* Dashboard Container *!*/
-/*.dashboard-container {*/
-/*    max-width: 800px;*/
-/*    margin: 50px auto;*/
-/*    padding: 30px;*/
-/*    background-color: #2563eb; !* Lighter blue container *!*/
-/*    border-radius: 12px;*/
-/*    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2);*/
-/*}*/
-
-/*!* Heading *!*/
-/*h2 {*/
-/*    text-align: center;*/
-/*    color: #ffffff;*/
-/*    margin-bottom: 25px;*/
-/*}*/
-
-/*!* Location Info *!*/
-/*p {*/
-/*    font-size: 16px;*/
-/*    color: #e0e7ff; !* Soft light blue text *!*/
-/*    margin: 10px 0;*/
-/*}*/
-
-/*!* Error Messages *!*/
-/*.message.error {*/
-/*    color: #fca5a5; !* Soft red for errors *!*/
-/*    text-align: center;*/
-/*    margin-bottom: 15px;*/
-/*    font-weight: bold;*/
-/*}*/
-
-/*!* Buttons *!*/
-/*button {*/
-/*    display: block;*/
-/*    margin: 15px auto;*/
-/*    padding: 10px 20px;*/
-/*    background-color: #3b82f6; !* Medium blue *!*/
-/*    color: white;*/
-/*    font-size: 16px;*/
-/*    border: none;*/
-/*    border-radius: 6px;*/
-/*    cursor: pointer;*/
-/*    transition: all 0.3s ease;*/
-/*}*/
-
-/*button:hover {*/
-/*    background-color: #1e40af; !* Darker blue on hover *!*/
-/*    transform: translateY(-2px);*/
-/*}*/
-
-/*!* Navigation Menu *!*/
-/*nav ul {*/
-/*    display: flex;*/
-/*    justify-content: center;*/
-/*    gap: 25px;*/
-/*    padding: 0;*/
-/*    margin-top: 20px;*/
-/*    list-style: none;*/
-/*}*/
-
-/*nav ul li a {*/
-/*    text-decoration: none;*/
-/*    color: #e0e7ff; !* Light text for links *!*/
-/*    font-size: 18px;*/
-/*    transition: color 0.3s;*/
-/*}*/
-
-/*nav ul li a:hover {*/
-/*    color: #c7d2fe; !* Lighter hover effect *!*/
-/*}*/
-
-/*!* Chat Styles *!*/
-/*.chat-container {*/
-/*    max-width: 600px;*/
-/*    margin: 20px auto 0;*/
-/*    padding: 20px;*/
-/*    background-color: #3b82f6; !* Blue chat container *!*/
-/*    border-radius: 8px;*/
-/*    box-shadow: 0 3px 10px rgba(0,0,0,0.2);*/
-/*}*/
-
-/*#chatMessages {*/
-/*    height: 300px;*/
-/*    overflow-y: auto;*/
-/*    border: 1px solid #60a5fa; !* Light blue border *!*/
-/*    padding: 15px;*/
-/*    margin-bottom: 15px;*/
-/*    border-radius: 6px;*/
-/*    background-color: #93c5fd; !* Light blue background for messages *!*/
-/*    color: #1e3a8a; !* Dark text for messages *!*/
-/*}*/
-
-/*#chatMessages p {*/
-/*    margin: 6px 0;*/
-/*}*/
-
-/*#messageInput {*/
-/*    width: calc(100% - 100px);*/
-/*    padding: 10px;*/
-/*    margin-right: 10px;*/
-/*    border-radius: 6px;*/
-/*    border: 1px solid #60a5fa;*/
-/*}*/
-
-/*form {*/
-/*    display: flex;*/
-/*    align-items: center;*/
-/*}*/
-
-
 /* ===== General Reset ===== */
 * {
     margin: 0;
@@ -128,9 +8,12 @@
 
 /* ===== Body Styling ===== */
 body {
-    background: #0b1d3a; /* Dark blue background */
+    background: url('/images/background.jpg') no-repeat center center fixed; /* Replace with your image path */
+    background-size: cover;
+    background-color: #0b1d3a; /* Fallback dark blue background */
     color: #f5f5f5; /* Light text */
     display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
     min-height: 100vh;
@@ -143,12 +26,14 @@ body {
 .dashboard-container,
 .find-taxi-container,
 .welcome-container {
-    background: #111; /* deep black panel */
+    background: rgba(17, 17, 17, 0.8); /* Semi-transparent deep black panel for better contrast */
     border-radius: 15px;
     padding: 30px 40px;
     max-width: 500px;
     width: 100%;
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.7);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, женні
+
+System: 0.7);
     border: 2px solid #ffd700; /* gold outline */
 }
 
@@ -284,87 +169,30 @@ nav ul li a:hover {
     }
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/* ===== Form Styling (Scoped to .form-container only) ===== */
-.form-container {
+/* ===== Form Styling (Scoped to .form-group for login form) ===== */
+.form-group {
     display: flex;
     flex-direction: column;
-    gap: 15px;
-    background-color: #ffffff;
-    padding: 25px 30px;
-    border-radius: 12px;
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.05);
-    color: #212529;
-    max-width: 600px;
-    margin: 0 auto;
+    gap: 5px;
 }
 
-.form-container form label {
+.form-group label {
     font-weight: 600;
-    color: #212529;
+    color: #f5f5f5;
 }
 
-.form-container form input[type="text"],
-.form-container form input[type="email"],
-.form-container form input[type="file"],
-.form-container form input[type="password"],
-.form-container form input[type="number"] {
+.form-group input[type="text"],
+.form-group input[type="password"] {
     width: 100%;
     padding: 10px 14px;
-    border: 1px solid #ced4da;
-    border-radius: 6px;
-    background-color: #fff;
-    color: #212529;
+    border: 1px solid #444;
+    border-radius: 10px;
+    background-color: #1b2a4b;
+    color: #f5f5f5;
     transition: border-color 0.3s, box-shadow 0.3s;
 }
-
-.form-container form input:focus {
-    border-color: #0d6efd;
-    box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.25);
+.form-group input:focus {
+    border-color: #ffd700;
+    box-shadow: 0 0 10px #ffd700;
     outline: none;
 }
-
-.form-container form button {
-    background-color: #0d6efd;
-    color: #fff;
-    padding: 12px;
-    border: none;
-    border-radius: 6px;
-    font-weight: bold;
-    cursor: pointer;
-    transition: background-color 0.3s;
-}
-
-.form-container form button:hover {
-    background-color: #0b5ed7;
-}
-
-.form-container .form-section {
-    margin-bottom: 40px;
-}
-
