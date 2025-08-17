@@ -56,14 +56,6 @@ public class FormService {
         }
 
         List<String> missingFields = new ArrayList<>();
-        if (userData.getFirstName() == null || userData.getFirstName().isEmpty()) missingFields.add("firstName");
-        if (userData.getLastName() == null || userData.getLastName().isEmpty()) missingFields.add("lastName");
-        if (userData.getEmail() == null || userData.getEmail().isEmpty()) missingFields.add("email");
-        if (userData.getAddress() == null || userData.getAddress().isEmpty()) missingFields.add("address");
-        if (userData.getPhone() == null || userData.getPhone().isEmpty()) missingFields.add("phone");
-
-        LOGGER.info("Missing fields: " + missingFields);
-
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         PdfReader reader = null;
         PdfDocument pdfDoc = null;
@@ -81,36 +73,26 @@ public class FormService {
             Map<String, PdfFormField> fields = form.getAllFormFields();
             LOGGER.info("Available PDF form fields: " + fields.keySet());
 
-            // Fill fields using PDF field names
-            if (fields.containsKey("FirstName") && userData.getFirstName() != null && !userData.getFirstName().isEmpty()) {
-                form.getField("FirstName").setValue(userData.getFirstName());
-                LOGGER.info("Filled field 'FirstName' with value: " + userData.getFirstName());
-            } else {
-                LOGGER.warning("Field 'FirstName' not filled: " + (fields.containsKey("FirstName") ? "empty/null value" : "field not found"));
-            }
-            if (fields.containsKey("LastName") && userData.getLastName() != null && !userData.getLastName().isEmpty()) {
-                form.getField("LastName").setValue(userData.getLastName());
-                LOGGER.info("Filled field 'LastName' with value: " + userData.getLastName());
-            } else {
-                LOGGER.warning("Field 'LastName' not filled: " + (fields.containsKey("LastName") ? "empty/null value" : "field not found"));
-            }
-            if (fields.containsKey("EmailAddress") && userData.getEmail() != null && !userData.getEmail().isEmpty()) {
-                form.getField("EmailAddress").setValue(userData.getEmail());
-                LOGGER.info("Filled field 'EmailAddress' with value: " + userData.getEmail());
-            } else {
-                LOGGER.warning("Field 'EmailAddress' not filled: " + (fields.containsKey("EmailAddress") ? "empty/null value" : "field not found"));
-            }
-            if (fields.containsKey("StreetAddress") && userData.getAddress() != null && !userData.getAddress().isEmpty()) {
-                form.getField("StreetAddress").setValue(userData.getAddress());
-                LOGGER.info("Filled field 'StreetAddress' with value: " + userData.getAddress());
-            } else {
-                LOGGER.warning("Field 'StreetAddress' not filled: " + (fields.containsKey("StreetAddress") ? "empty/null value" : "field not found"));
-            }
-            if (fields.containsKey("PhoneNumber") && userData.getPhone() != null && !userData.getPhone().isEmpty()) {
-                form.getField("PhoneNumber").setValue(userData.getPhone());
-                LOGGER.info("Filled field 'PhoneNumber' with value: " + userData.getPhone());
-            } else {
-                LOGGER.warning("Field 'PhoneNumber' not filled: " + (fields.containsKey("PhoneNumber") ? "empty/null value" : "field not found"));
+            // Map UserData fields to PDF field names
+            Map<String, String> fieldMappings = Map.of(
+                    "FirstName", userData.getFirstName(),
+                    "LastName", userData.getLastName(),
+                    "EmailAddress", userData.getEmail(),
+                    "StreetAddress", userData.getAddress(),
+                    "PhoneNumber", userData.getPhone()
+            );
+
+            // Check for missing fields and fill available ones
+            for (String pdfField : fields.keySet()) {
+                if (pdfField.equals("Submit")) continue; // Skip submit button
+                String value = fieldMappings.getOrDefault(pdfField, userData.getAdditionalFields().getOrDefault(pdfField, null));
+                if (value == null || value.isEmpty()) {
+                    missingFields.add(pdfField); // Use PDF field name for consistency
+                    LOGGER.warning("Field '" + pdfField + "' is missing or empty");
+                } else {
+                    form.getField(pdfField).setValue(value);
+                    LOGGER.info("Filled field '" + pdfField + "' with value: " + value);
+                }
             }
 
             form.flattenFields();
@@ -127,6 +109,7 @@ public class FormService {
         LOGGER.info("Generated PDF size: " + partialPdf.length + " bytes");
         return new PdfFillResult(partialPdf, missingFields);
     }
+
     public byte[] fillPdfFormWithAdditional(byte[] pdfBytes, UserData userData, Map<String, String> additionalFields) throws Exception {
         LOGGER.info("Processing additional fields for email " + userData.getEmail() + ": " + additionalFields);
 
@@ -135,27 +118,41 @@ public class FormService {
             throw new IllegalArgumentException("Input PDF is null or empty");
         }
 
-        // Update userData with additional fields
-        if (additionalFields.containsKey("firstName") && !additionalFields.get("firstName").isEmpty()) {
-            userData.setFirstName(additionalFields.get("firstName"));
-            LOGGER.info("Updated firstName: " + userData.getFirstName());
+        // Update UserData with additional fields
+        Map<String, String> currentAdditionalFields = userData.getAdditionalFields();
+        for (Map.Entry<String, String> entry : additionalFields.entrySet()) {
+            String fieldName = entry.getKey();
+            String value = entry.getValue();
+            if (value != null && !value.isEmpty()) {
+                switch (fieldName) {
+                    case "FirstName":
+                        userData.setFirstName(value);
+                        LOGGER.info("Updated FirstName: " + value);
+                        break;
+                    case "LastName":
+                        userData.setLastName(value);
+                        LOGGER.info("Updated LastName: " + value);
+                        break;
+                    case "EmailAddress":
+                        userData.setEmail(value);
+                        LOGGER.info("Updated EmailAddress: " + value);
+                        break;
+                    case "StreetAddress":
+                        userData.setAddress(value);
+                        LOGGER.info("Updated StreetAddress: " + value);
+                        break;
+                    case "PhoneNumber":
+                        userData.setPhone(value);
+                        LOGGER.info("Updated PhoneNumber: " + value);
+                        break;
+                    default:
+                        currentAdditionalFields.put(fieldName, value);
+                        LOGGER.info("Updated additional field " + fieldName + ": " + value);
+                        break;
+                }
+            }
         }
-        if (additionalFields.containsKey("lastName") && !additionalFields.get("lastName").isEmpty()) {
-            userData.setLastName(additionalFields.get("lastName"));
-            LOGGER.info("Updated lastName: " + userData.getLastName());
-        }
-        if (additionalFields.containsKey("email") && !additionalFields.get("email").isEmpty()) {
-            userData.setEmail(additionalFields.get("email"));
-            LOGGER.info("Updated email: " + userData.getEmail());
-        }
-        if (additionalFields.containsKey("address") && !additionalFields.get("address").isEmpty()) {
-            userData.setAddress(additionalFields.get("address"));
-            LOGGER.info("Updated address: " + userData.getAddress());
-        }
-        if (additionalFields.containsKey("phone") && !additionalFields.get("phone").isEmpty()) {
-            userData.setPhone(additionalFields.get("phone"));
-            LOGGER.info("Updated phone: " + userData.getPhone());
-        }
+        userData.setAdditionalFields(currentAdditionalFields);
 
         // Save updated user data
         if (userData.getEmail() != null && !userData.getEmail().isEmpty()) {
