@@ -1,0 +1,27 @@
+\documentclass[a4paper,12pt]{article}
+\usepackage{geometry}
+\geometry{a4paper, margin=1in}
+\usepackage{hyperref}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\hypersetup{
+    pdfcreator={LaTeX with hyperref},
+    pdfproducer={xelatex}
+}
+\usepackage{noto}
+\begin{document}
+\begin{Form}
+\section*{User Information Form}
+\textbf{First Name:} \TextField[name=firstName, width=0.7\textwidth]{First Name} \par
+\vspace{0.5cm}
+\textbf{Last Name:} \TextField[name=lastName, width=0.7\textwidth]{Last Name} \par
+\vspace{0.5cm}
+\textbf{Email:} \TextField[name=email, width=0.7\textwidth]{Email} \par
+\vspace{0.5cm}
+\textbf{Address:} \TextField[name=address, width=0.7\textwidth]{Address} \par
+\vspace{0.5cm}
+\textbf{Phone:} \TextField[name=phone, width=0.7\textwidth]{Phone} \par
+\vspace{0.5cm}
+\SubmitButton[print]{Submit Form}
+\end{Form}
+\end{document}

@@ -25,16 +25,17 @@ public class FormService {
     private UserDataRepository userDataRepository;
 
     public UserData saveUserData(UserData userData) {
+        LOGGER.info("Saving user data for email: " + userData.getEmail());
         return userDataRepository.save(userData);
     }
 
     public UserData getUserData(String email) {
+        LOGGER.info("Fetching user data for email: " + email);
         List<UserData> results = userDataRepository.findByEmail(email);
         return results.isEmpty() ? null : results.get(0);
     }
 
     public PdfFillResult fillPdfForm(byte[] pdfBytes, UserData userData) throws Exception {
-        // Check for missing fields
         List<String> missingFields = new ArrayList<>();
         if (userData.getEmail() == null || userData.getEmail().isEmpty()) missingFields.add("email");
         if (userData.getFirstName() == null || userData.getFirstName().isEmpty()) missingFields.add("firstName");
@@ -42,7 +43,6 @@ public class FormService {
         if (userData.getAddress() == null || userData.getAddress().isEmpty()) missingFields.add("address");
         if (userData.getPhone() == null || userData.getPhone().isEmpty()) missingFields.add("phone");
 
-        // Fill PDF with available fields
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         PdfReader reader = new PdfReader(new ByteArrayInputStream(pdfBytes));
         PdfWriter writer = new PdfWriter(outputStream);
@@ -50,65 +50,66 @@ public class FormService {
         PdfAcroForm form = PdfAcroForm.getAcroForm(pdfDoc, true);
         Map<String, PdfFormField> fields = form.getAllFormFields();
 
-        // Log all field names for debugging
         LOGGER.info("Available PDF form fields: " + fields.keySet());
 
-        fields.forEach((name, field) -> {
-            // More precise field matching
-            if (name.equalsIgnoreCase("FirstName") || name.equalsIgnoreCase("First Name") || name.equalsIgnoreCase("GivenName")) {
-                if (userData.getFirstName() != null && !userData.getFirstName().isEmpty()) {
-                    field.setValue(userData.getFirstName());
-                    LOGGER.info("Filled field '" + name + "' with value: " + userData.getFirstName());
-                }
-            } else if (name.equalsIgnoreCase("LastName") || name.equalsIgnoreCase("Last Name") || name.equalsIgnoreCase("Surname")) {
-                if (userData.getLastName() != null && !userData.getLastName().isEmpty()) {
-                    field.setValue(userData.getLastName());
-                    LOGGER.info("Filled field '" + name + "' with value: " + userData.getLastName());
-                }
-            } else if (name.equalsIgnoreCase("Email") || name.equalsIgnoreCase("EmailAddress")) {
-                if (userData.getEmail() != null && !userData.getEmail().isEmpty()) {
-                    field.setValue(userData.getEmail());
-                    LOGGER.info("Filled field '" + name + "' with value: " + userData.getEmail());
-                }
-            } else if (name.equalsIgnoreCase("Address") || name.equalsIgnoreCase("StreetAddress")) {
-                if (userData.getAddress() != null && !userData.getAddress().isEmpty()) {
-                    field.setValue(userData.getAddress());
-                    LOGGER.info("Filled field '" + name + "' with value: " + userData.getAddress());
-                }
-            } else if (name.equalsIgnoreCase("Phone") || name.equalsIgnoreCase("PhoneNumber") || name.equalsIgnoreCase("Telephone")) {
-                if (userData.getPhone() != null && !userData.getPhone().isEmpty()) {
-                    field.setValue(userData.getPhone());
-                    LOGGER.info("Filled field '" + name + "' with value: " + userData.getPhone());
-                }
+        if (userData.getFirstName() != null && !userData.getFirstName().isEmpty()) {
+            if (fields.containsKey("firstName")) {
+                form.getField("firstName").setValue(userData.getFirstName());
+                LOGGER.info("Filled field 'firstName' with value: " + userData.getFirstName());
             }
-        });
+        }
+        if (userData.getLastName() != null && !userData.getLastName().isEmpty()) {
+            if (fields.containsKey("lastName")) {
+                form.getField("lastName").setValue(userData.getLastName());
+                LOGGER.info("Filled field 'lastName' with value: " + userData.getLastName());
+            }
+        }
+        if (userData.getEmail() != null && !userData.getEmail().isEmpty()) {
+            if (fields.containsKey("email")) {
+                form.getField("email").setValue(userData.getEmail());
+                LOGGER.info("Filled field 'email' with value: " + userData.getEmail());
+            }
+        }
+        if (userData.getAddress() != null && !userData.getAddress().isEmpty()) {
+            if (fields.containsKey("address")) {
+                form.getField("address").setValue(userData.getAddress());
+                LOGGER.info("Filled field 'address' with value: " + userData.getAddress());
+            }
+        }
+        if (userData.getPhone() != null && !userData.getPhone().isEmpty()) {
+            if (fields.containsKey("phone")) {
+                form.getField("phone").setValue(userData.getPhone());
+                LOGGER.info("Filled field 'phone' with value: " + userData.getPhone());
+            }
+        }
 
         form.flattenFields();
         pdfDoc.close();
-        byte[] partialPdf = outputStream.toByteArray();
-
-        return new PdfFillResult(partialPdf, missingFields);
+        reader.close();
+        return new PdfFillResult(outputStream.toByteArray(), missingFields);
     }
 
     public byte[] fillPdfFormWithAdditional(byte[] pdfBytes, UserData userData, Map<String, String> additionalFields) throws Exception {
+        LOGGER.info("Processing additional fields: " + additionalFields.keySet());
+
         // Update userData with additional fields
         if (additionalFields.containsKey("firstName")) userData.setFirstName(additionalFields.get("firstName"));
         if (additionalFields.containsKey("lastName")) userData.setLastName(additionalFields.get("lastName"));
         if (additionalFields.containsKey("address")) userData.setAddress(additionalFields.get("address"));
         if (additionalFields.containsKey("phone")) userData.setPhone(additionalFields.get("phone"));
-        // Email is already provided, so no need to update it
 
         // Save updated user data
-        userDataRepository.save(userData);
+        if (userData.getEmail() != null) {
+            userDataRepository.save(userData);
+            LOGGER.info("Updated user data saved for email: " + userData.getEmail());
+        }
 
         // Fill PDF with updated data
         PdfFillResult result = fillPdfForm(pdfBytes, userData);
         if (!result.missingFields.isEmpty()) {
-            throw new MissingFieldsException("Some fields are still missing after additional input: " + String.join(", ", result.missingFields), result.missingFields, result.pdfBytes);
+            LOGGER.warning("Missing fields after additional input: " + result.missingFields);
+            throw new MissingFieldsException("Some fields are still missing: " + String.join(", ", result.missingFields), result.missingFields, result.pdfBytes);
         }
         return result.pdfBytes;
     }
 }
-
-
-

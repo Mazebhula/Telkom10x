@@ -83,9 +83,8 @@ public class FormController {
         model.addAttribute("username", email);
         return "view";
     }
-
     @PostMapping("/fill-pdf")
-    public ResponseEntity<Object> fillPdf(@RequestParam String email, @RequestParam("file") MultipartFile file) {
+    public Object fillPdf(@RequestParam String email, @RequestParam("file") MultipartFile file, Model model) {
         try {
             UserData userData = formService.getUserData(email);
             if (userData == null) {
@@ -100,13 +99,10 @@ public class FormController {
                         .contentType(MediaType.APPLICATION_PDF)
                         .body(result.pdfBytes);
             } else {
-                return ResponseEntity.badRequest()
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .body(Map.of(
-                                "message", "Missing required fields: " + String.join(", ", result.missingFields),
-                                "missingFields", result.missingFields,
-                                "partialPdf", Base64.getEncoder().encodeToString(result.pdfBytes)
-                        ));
+                model.addAttribute("email", email);
+                model.addAttribute("missingFields", result.missingFields);
+                model.addAttribute("partialPdf", Base64.getEncoder().encodeToString(result.pdfBytes));
+                return "missing_fields";
             }
         } catch (Exception e) {
             return ResponseEntity.badRequest()
@@ -118,7 +114,8 @@ public class FormController {
     @PostMapping("/fill-pdf-with-additional")
     public ResponseEntity<Object> fillPdfWithAdditional(
             @RequestParam String email,
-            @RequestParam("file") MultipartFile file,
+            @RequestParam(value = "file", required = false) MultipartFile file,
+            @RequestParam(value = "partialPdf", required = false) String partialPdf,
             @RequestParam Map<String, String> allParams) {
         try {
             UserData userData = formService.getUserData(email);
@@ -130,8 +127,10 @@ public class FormController {
             Map<String, String> additionalFields = new HashMap<>(allParams);
             additionalFields.remove("email");
             additionalFields.remove("file");
-            additionalFields.remove("partialPdf"); // Remove partialPdf if sent
-            byte[] filledPdf = formService.fillPdfFormWithAdditional(file.getBytes(), userData, additionalFields);
+            additionalFields.remove("partialPdf");
+
+            byte[] pdfBytes = partialPdf != null ? Base64.getDecoder().decode(partialPdf) : file.getBytes();
+            byte[] filledPdf = formService.fillPdfFormWithAdditional(pdfBytes, userData, additionalFields);
             return ResponseEntity.ok()
                     .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=filled_form.pdf")
                     .contentType(MediaType.APPLICATION_PDF)
