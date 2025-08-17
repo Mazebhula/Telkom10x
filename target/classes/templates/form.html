@@ -53,5 +53,73 @@
         <button type="submit">Fill PDF</button>
     </form>
 </div>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
+<script>
+    document.getElementById('fillPdfForm').addEventListener('submit', async function(event) {
+        event.preventDefault();
+        const form = event.target;
+        const formData = new FormData(form);
+
+        try {
+            const response = await fetch(form.action, {
+                method: 'POST',
+                body: formData
+            });
+
+            if (response.status === 400) {
+                const data = await response.json();
+                if (data.missingFields && data.missingFields.length > 0) {
+                    // Populate modal with missing fields
+                    const container = document.getElementById('missingFieldsContainer');
+                    container.innerHTML = '';
+                    document.getElementById('modalEmail').value = formData.get('email');
+                    // Store partial PDF as a hidden input
+                    const partialPdfInput = document.createElement('input');
+                    partialPdfInput.type = 'hidden';
+                    partialPdfInput.name = 'partialPdf';
+                    partialPdfInput.value = data.partialPdf || '';
+                    container.appendChild(partialPdfInput);
+                    // Add file input for resubmission
+                    const fileInput = document.createElement('input');
+                    fileInput.type = 'hidden';
+                    fileInput.name = 'file';
+                    fileInput.value = formData.get('file');
+                    container.appendChild(fileInput);
+                    data.missingFields.forEach(field => {
+                        const div = document.createElement('div');
+                        div.className = 'mb-3';
+                        div.innerHTML = `
+                            <label for="${field}" class="form-label">${field.charAt(0).toUpperCase() + field.slice(1)}:</label>
+                            <input type="text" class="form-control" id="${field}" name="${field}" required>
+                        `;
+                        container.appendChild(div);
+                    });
+
+                    // Show modal
+                    const modal = new bootstrap.Modal(document.getElementById('missingFieldsModal'));
+                    modal.show();
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            } else if (response.ok) {
+                // Handle successful PDF download
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'filled_form.pdf';
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                window.URL.revokeObjectURL(url);
+            } else {
+                alert('An unexpected error occurred.');
+            }
+        } catch (error) {
+            alert('Error: ' + error.message);
+        }
+    });
+</script>
 </body>
 </html>

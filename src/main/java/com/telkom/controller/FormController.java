@@ -3,6 +3,7 @@ package com.telkom.controller;
 import com.telkom.model.UserData;
 import com.telkom.service.FormService;
 import com.telkom.service.MissingFieldsException;
+import com.telkom.service.PdfFillResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -83,7 +85,7 @@ public class FormController {
     }
 
     @PostMapping("/fill-pdf")
-    public ResponseEntity<?> fillPdf(@RequestParam String email, @RequestParam("file") MultipartFile file) {
+    public ResponseEntity<Object> fillPdf(@RequestParam String email, @RequestParam("file") MultipartFile file) {
         try {
             UserData userData = formService.getUserData(email);
             if (userData == null) {
@@ -91,15 +93,21 @@ public class FormController {
                         .contentType(MediaType.APPLICATION_JSON)
                         .body(Map.of("message", "No data found for email: " + email));
             }
-            byte[] filledPdf = formService.fillPdfForm(file.getBytes(), userData);
-            return ResponseEntity.ok()
-                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=filled_form.pdf")
-                    .contentType(MediaType.APPLICATION_PDF)
-                    .body(filledPdf);
-        } catch (MissingFieldsException e) {
-            return ResponseEntity.badRequest()
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .body(Map.of("message", e.getMessage(), "missingFields", e.getMissingFields()));
+            PdfFillResult result = formService.fillPdfForm(file.getBytes(), userData);
+            if (result.missingFields.isEmpty()) {
+                return ResponseEntity.ok()
+                        .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=filled_form.pdf")
+                        .contentType(MediaType.APPLICATION_PDF)
+                        .body(result.pdfBytes);
+            } else {
+                return ResponseEntity.badRequest()
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .body(Map.of(
+                                "message", "Missing required fields: " + String.join(", ", result.missingFields),
+                                "missingFields", result.missingFields,
+                                "partialPdf", Base64.getEncoder().encodeToString(result.pdfBytes)
+                        ));
+            }
         } catch (Exception e) {
             return ResponseEntity.badRequest()
                     .contentType(MediaType.APPLICATION_JSON)
@@ -107,5 +115,39 @@ public class FormController {
         }
     }
 
-
+    @PostMapping("/fill-pdf-with-additional")
+    public ResponseEntity<Object> fillPdfWithAdditional(
+            @RequestParam String email,
+            @RequestParam("file") MultipartFile file,
+            @RequestParam Map<String, String> allParams) {
+        try {
+            UserData userData = formService.getUserData(email);
+            if (userData == null) {
+                return ResponseEntity.badRequest()
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .body(Map.of("message", "No data found for email: " + email));
+            }
+            Map<String, String> additionalFields = new HashMap<>(allParams);
+            additionalFields.remove("email");
+            additionalFields.remove("file");
+            additionalFields.remove("partialPdf"); // Remove partialPdf if sent
+            byte[] filledPdf = formService.fillPdfFormWithAdditional(file.getBytes(), userData, additionalFields);
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=filled_form.pdf")
+                    .contentType(MediaType.APPLICATION_PDF)
+                    .body(filledPdf);
+        } catch (MissingFieldsException e) {
+            return ResponseEntity.badRequest()
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(Map.of(
+                            "message", e.getMessage(),
+                            "missingFields", e.getMissingFields(),
+                            "partialPdf", Base64.getEncoder().encodeToString(e.getPartialPdf())
+                    ));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest()
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(Map.of("message", "Error processing PDF with additional fields: " + e.getMessage()));
+        }
+    }
 }
