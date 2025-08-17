@@ -48,6 +48,15 @@ public class FormController {
         }
         return "redirect:/dashboard";
     }
+    @GetMapping("/form")
+    public String showFormPage(Model model, Authentication authentication) {
+        if (authentication != null && authentication.isAuthenticated()) {
+            model.addAttribute("userData", new UserData());
+            return "form"; // renders form.html
+        }
+        return "redirect:/login";
+    }
+
 
     @PostMapping("/save")
     public String saveUserData(@ModelAttribute UserData userData, Model model) {

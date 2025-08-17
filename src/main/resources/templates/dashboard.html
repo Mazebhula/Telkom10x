@@ -14,61 +14,18 @@
 <body>
 <div class="dashboard-container">
     <h2>Welcome, <span th:text="${username}"></span>!</h2>
-    <div th:if="${location}">
-        <p>Location: <span th:text="${location.latitude + ', ' + location.longitude}"></span></p>
-    </div>
+
     <div th:if="${error}" class="message error" th:text="${error}"></div>
     <div th:if="${success}" class="message success" th:text="${success}"></div>
-    <button onclick="getLocation()">Share My Location</button>
+
     <nav>
         <ul>
             <li><a th:href="@{/home}">Home</a></li>
-            <li><a th:href="@{/form}">form</a></li>
-            <li><a th:href="@{/view}">View</a></li>
+            <li><a th:href="@{/form}">Form</a></li> <!-- This will go to /form -->
+            <li><a th:href="@{/view(email=${username})}">View</a></li>
             <li><a th:href="@{/logout}">Logout</a></li>
         </ul>
     </nav>
 </div>
-<script>
-    function getLocation() {
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(
-                position => {
-                    const latitude = position.coords.latitude;
-                    const longitude = position.coords.longitude;
-                    const username = document.querySelector('[th\\:text="${username}"]').textContent;
-                    fetch('/location', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                        body: `username=${encodeURIComponent(username)}&latitude=${encodeURIComponent(latitude)}&longitude=${encodeURIComponent(longitude)}`
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            showMessage('Location shared successfully', 'success');
-                            setTimeout(() => window.location.reload(), 1000);
-                        } else {
-                            showMessage('Error: ' + data.error, 'error');
-                        }
-                    })
-                    .catch(error => showMessage('Error sharing location: ' + error, 'error'));
-                },
-                error => {
-                    showMessage('Geolocation error: ' + error.message, 'error');
-                }
-            );
-        } else {
-            showMessage('Geolocation is not supported by this browser.', 'error');
-        }
-    }
-
-    function showMessage(message, type) {
-        const messageDiv = document.createElement('div');
-        messageDiv.className = `message ${type}`;
-        messageDiv.textContent = message;
-        document.querySelector('.dashboard-container').insertBefore(messageDiv, document.querySelector('nav'));
-        setTimeout(() => messageDiv.remove(), 5000);
-    }
-</script>
 </body>
 </html>
