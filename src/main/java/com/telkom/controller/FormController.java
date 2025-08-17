@@ -2,6 +2,7 @@ package com.telkom.controller;
 
 import com.telkom.model.UserData;
 import com.telkom.service.FormService;
+import com.telkom.service.MissingFieldsException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -15,6 +16,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @Controller
 public class FormController {
     @Autowired
@@ -25,7 +29,7 @@ public class FormController {
         if (authentication != null && authentication.isAuthenticated()) {
             model.addAttribute("userData", new UserData());
             model.addAttribute("username", authentication.getName());
-            return "dashboard"; // Maps to form.html for "Find a Taxi"
+            return "dashboard";
         }
         return "redirect:/login";
     }
@@ -35,7 +39,7 @@ public class FormController {
         if (error != null) {
             model.addAttribute("error", "Invalid username or password");
         }
-        return "login"; // Maps to login.html
+        return "login";
     }
 
     @GetMapping("/dashboard")
@@ -45,19 +49,19 @@ public class FormController {
             UserData userData = formService.getUserData(email);
             model.addAttribute("username", email);
             model.addAttribute("userData", userData != null ? userData : new UserData());
-            return "view"; // Maps to view.html for "whoami"
-        }
-        return "redirect:/login"; // Fixed redirect to /login
-    }
-    @GetMapping("/form")
-    public String showFormPage(Model model, Authentication authentication) {
-        if (authentication != null && authentication.isAuthenticated()) {
-            model.addAttribute("userData", new UserData());
-            return "form"; // renders form.html
+            return "view";
         }
         return "redirect:/login";
     }
 
+    @GetMapping("/form")
+    public String showFormPage(Model model, Authentication authentication) {
+        if (authentication != null && authentication.isAuthenticated()) {
+            model.addAttribute("userData", new UserData());
+            return "form";
+        }
+        return "redirect:/login";
+    }
 
     @PostMapping("/save")
     public String saveUserData(@ModelAttribute UserData userData, Model model) {
@@ -67,7 +71,7 @@ public class FormController {
         } catch (Exception e) {
             model.addAttribute("message", "Error saving data: " + e.getMessage());
         }
-        return "form"; // Return to form.html after saving
+        return "form";
     }
 
     @GetMapping("/view")
@@ -75,22 +79,33 @@ public class FormController {
         UserData userData = formService.getUserData(email);
         model.addAttribute("userData", userData != null ? userData : new UserData());
         model.addAttribute("username", email);
-        return "view"; // Maps to view.html
+        return "view";
     }
 
     @PostMapping("/fill-pdf")
-    public ResponseEntity<byte[]> fillPdf(@RequestParam String email, @RequestParam("file") MultipartFile file, Model model) throws Exception {
-        UserData userData = formService.getUserData(email);
-        if (userData == null) {
-            model.addAttribute("message", "No data found for email: " + email);
+    public ResponseEntity<?> fillPdf(@RequestParam String email, @RequestParam("file") MultipartFile file) {
+        try {
+            UserData userData = formService.getUserData(email);
+            if (userData == null) {
+                return ResponseEntity.badRequest()
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .body(Map.of("message", "No data found for email: " + email));
+            }
+            byte[] filledPdf = formService.fillPdfForm(file.getBytes(), userData);
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=filled_form.pdf")
+                    .contentType(MediaType.APPLICATION_PDF)
+                    .body(filledPdf);
+        } catch (MissingFieldsException e) {
             return ResponseEntity.badRequest()
-                    .contentType(MediaType.TEXT_PLAIN)
-                    .body(("No data found for email: " + email).getBytes());
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(Map.of("message", e.getMessage(), "missingFields", e.getMissingFields()));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest()
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(Map.of("message", "Error processing PDF: " + e.getMessage()));
         }
-        byte[] filledPdf = formService.fillPdfForm(file.getBytes(), userData);
-        return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=filled_form.pdf")
-                .contentType(MediaType.APPLICATION_PDF)
-                .body(filledPdf);
     }
+
+
 }

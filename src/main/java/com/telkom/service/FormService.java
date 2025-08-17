@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -25,20 +26,30 @@ public class FormService {
 
     public UserData getUserData(String email) {
         List<UserData> results = userDataRepository.findByEmail(email);
-        return results.isEmpty() ? null : results.get(0); // Return first result or null if none
+        return results.isEmpty() ? null : results.get(0);
     }
 
     public byte[] fillPdfForm(byte[] pdfBytes, UserData userData) throws Exception {
+        // Check for missing fields
+        List<String> missingFields = new ArrayList<>();
+        if (userData.getEmail() == null || userData.getEmail().isEmpty()) missingFields.add("email");
+        if (userData.getFirstName() == null || userData.getFirstName().isEmpty()) missingFields.add("firstName");
+        if (userData.getLastName() == null || userData.getLastName().isEmpty()) missingFields.add("lastName");
+        if (userData.getAddress() == null || userData.getAddress().isEmpty()) missingFields.add("address");
+        if (userData.getPhone() == null || userData.getPhone().isEmpty()) missingFields.add("phone");
+
+        if (!missingFields.isEmpty()) {
+            throw new MissingFieldsException("Missing required fields: " + String.join(", ", missingFields), missingFields);
+        }
+
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         PdfReader reader = new PdfReader(new ByteArrayInputStream(pdfBytes));
         PdfWriter writer = new PdfWriter(outputStream);
         PdfDocument pdfDoc = new PdfDocument(reader, writer);
         PdfAcroForm form = PdfAcroForm.getAcroForm(pdfDoc, true);
-        System.out.println("test");
         Map<String, PdfFormField> fields = form.getAllFormFields();
         fields.forEach((name, field) -> {
-            System.out.println(field);
-            if (name.toLowerCase().contains("first") || name.toLowerCase().contains("Name")) {
+            if (name.toLowerCase().contains("first") || name.toLowerCase().contains("name")) {
                 field.setValue(userData.getFirstName());
             } else if (name.toLowerCase().contains("last") && userData.getLastName() != null) {
                 field.setValue(userData.getLastName());
@@ -55,4 +66,20 @@ public class FormService {
         pdfDoc.close();
         return outputStream.toByteArray();
     }
+
+    public byte[] fillPdfFormWithAdditional(byte[] pdfBytes, UserData userData, Map<String, String> additionalFields) throws Exception {
+        // Update userData with additional fields
+        if (additionalFields.containsKey("firstName")) userData.setFirstName(additionalFields.get("firstName"));
+        if (additionalFields.containsKey("lastName")) userData.setLastName(additionalFields.get("lastName"));
+        if (additionalFields.containsKey("address")) userData.setAddress(additionalFields.get("address"));
+        if (additionalFields.containsKey("phone")) userData.setPhone(additionalFields.get("phone"));
+        // Email is already provided, so no need to update it
+
+        // Save updated user data
+        userDataRepository.save(userData);
+
+        // Fill PDF with updated data
+        return fillPdfForm(pdfBytes, userData);
+    }
 }
+
