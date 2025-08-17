@@ -24,6 +24,7 @@ public class FormController {
     public String showForm(Model model, Authentication authentication) {
         if (authentication != null && authentication.isAuthenticated()) {
             model.addAttribute("userData", new UserData());
+            model.addAttribute("username", authentication.getName());
             return "dashboard"; // Maps to form.html for "Find a Taxi"
         }
         return "redirect:/login";
@@ -40,13 +41,13 @@ public class FormController {
     @GetMapping("/dashboard")
     public String showDashboard(Model model, Authentication authentication) {
         if (authentication != null && authentication.isAuthenticated()) {
-            String email = authentication.getName(); // Assumes email is the username in authentication
+            String email = authentication.getName();
             UserData userData = formService.getUserData(email);
             model.addAttribute("username", email);
             model.addAttribute("userData", userData != null ? userData : new UserData());
-            return "dashboard"; // Maps to view.html for "whoami"
+            return "view"; // Maps to view.html for "whoami"
         }
-        return "redirect:/dashboard";
+        return "redirect:/login"; // Fixed redirect to /login
     }
     @GetMapping("/form")
     public String showFormPage(Model model, Authentication authentication) {
@@ -66,24 +67,25 @@ public class FormController {
         } catch (Exception e) {
             model.addAttribute("message", "Error saving data: " + e.getMessage());
         }
-        return "form";
+        return "form"; // Return to form.html after saving
     }
 
     @GetMapping("/view")
     public String viewData(@RequestParam String email, Model model) {
         UserData userData = formService.getUserData(email);
         model.addAttribute("userData", userData != null ? userData : new UserData());
-        return "view";
+        model.addAttribute("username", email);
+        return "view"; // Maps to view.html
     }
 
     @PostMapping("/fill-pdf")
     public ResponseEntity<byte[]> fillPdf(@RequestParam String email, @RequestParam("file") MultipartFile file, Model model) throws Exception {
         UserData userData = formService.getUserData(email);
         if (userData == null) {
-            model.addAttribute("message", "No user data found for email: " + email);
+            model.addAttribute("message", "No data found for email: " + email);
             return ResponseEntity.badRequest()
                     .contentType(MediaType.TEXT_PLAIN)
-                    .body(("No user data found for email: " + email).getBytes());
+                    .body(("No data found for email: " + email).getBytes());
         }
         byte[] filledPdf = formService.fillPdfForm(file.getBytes(), userData);
         return ResponseEntity.ok()
