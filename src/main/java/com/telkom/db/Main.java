@@ -3,9 +3,14 @@ package com.telkom.db;
 public class Main {
     public static void main(String[] args) {
         try {
-            FormDataManager manager = new FormDataManager("userforms.db");
+            FormDataManager manager = new FormDataManager();
+//            manager.saveField("user123", "LoginForm", "password", "mySecret123!");
+//            manager.printDecryptedFields("user123");
+//            manager.printDecryptedFields("user123");
 
-            // Simulate user filling fields
+//            FormDataManager manager = new FormDataManager("userforms.db");
+//
+//             //Simulate user filling fields
 //            manager.saveField("user123", "job_application", "email", "test@example.com");
 //            manager.saveField("user123", "job_application", "name", "Alice Wonderland");
 //            manager.saveField("user123", "job_application", "phone", "+123456789");
