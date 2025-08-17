@@ -283,3 +283,88 @@ nav ul li a:hover {
         gap: 10px;
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* ===== Form Styling (Scoped to .form-container only) ===== */
+.form-container {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    background-color: #ffffff;
+    padding: 25px 30px;
+    border-radius: 12px;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.05);
+    color: #212529;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.form-container form label {
+    font-weight: 600;
+    color: #212529;
+}
+
+.form-container form input[type="text"],
+.form-container form input[type="email"],
+.form-container form input[type="file"],
+.form-container form input[type="password"],
+.form-container form input[type="number"] {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1px solid #ced4da;
+    border-radius: 6px;
+    background-color: #fff;
+    color: #212529;
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.form-container form input:focus {
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.25);
+    outline: none;
+}
+
+.form-container form button {
+    background-color: #0d6efd;
+    color: #fff;
+    padding: 12px;
+    border: none;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.form-container form button:hover {
+    background-color: #0b5ed7;
+}
+
+.form-container .form-section {
+    margin-bottom: 40px;
+}
+
